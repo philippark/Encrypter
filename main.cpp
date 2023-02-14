@@ -2,11 +2,12 @@
 #include <map>
 #include <vector>
 #include <string>
-#include "Cypher.h"
+#include <cstring>
 #include <algorithm>
 #include <cstdlib>
 #include<random>
 #include <cctype>
+#include <fstream>
 
 std::map<char, char> caesar_encrypt(std::vector<char>& alphabet, unsigned int displacement, std::string in, std::string out){
     std::map<char, char> m;
@@ -98,25 +99,32 @@ void homophonic_decrypt(std::map<char, std::vector<std::string>>& key, std::stri
     std::ifstream infile(in);
     std::ofstream outfile(in+"_decrypted");
     std::string line;
-    while (getline(infile, line)){
-        std::cout << line << std::endl;
-        for (unsigned int i = 0; i < line.size(); i+=2){
-            if (std::isdigit(line[i])){
-                std::map<char, std::vector<std::string>>::iterator itr = key.begin();
-                while (itr != key.end()){
-                    for (unsigned int i = 0; i < itr->second.size(); i++){
-                        if (itr->second[i] == line.substr(i, i+1)){
-                            outfile << itr->first;
-                        }
-                    }
-                    itr++;
-                }
+
+    while(getline(infile, line)){
+        std::string word = "";
+        for (unsigned int i = 0; i < line.size(); i++){
+            if(std::isdigit(line[i])){
+                std::string digit(1, line[i]);
+                word += digit;
             }
             else{
-                outfile << line[i];
+                std::map<char, std::vector<std::string>>::iterator itr = key.begin();
+                while (itr != key.end()){
+                for (unsigned int i = 0; i < itr->second.size(); i++){
+                    if (itr->second[i] == word){
+                    outfile << itr->first;
+                    }
+                }
+                itr++;
+                }
+                word = "";
+                if (line[i] != '|'){
+                    outfile << line[i];
+                }
             }
             
         }
+
     }
 
 }
@@ -146,6 +154,7 @@ int main(int argc, char* argv[]){
 
         std::vector<int> letter_frq = {8, 2, 3, 4, 13, 2, 2, 6, 7, 1, 1, 4, 3, 7, 8, 2, 1, 6, 6, 9, 3, 1, 2, 1, 2, 1};
         std::vector<std::string> symbols;
+        //create symbols
         for (unsigned int i = 0; i < 105; i++){
             if (i / 10 < 1){
                 std::string pad = "0" + std::to_string(i);
@@ -157,21 +166,19 @@ int main(int argc, char* argv[]){
         
         std::random_shuffle(symbols.begin(), symbols.end());
 
-        int sum = 0;
-        for (unsigned int i = 0; i < letter_frq.size(); i++){
-            sum+=letter_frq[i];
-        }
-
-        
+        //assign symbols
         std::map<char, std::vector<std::string>> key;
         int count = 0;
         for (unsigned int i = 0; i < alphabet.size(); i++){
+            std::cout << alphabet[i] << ": ";
             std::vector<std::string> symbol_assignments;
             key[alphabet[i]] = symbol_assignments;
             for (int j = 0; j < letter_frq[i]; j++){
+                std::cout << symbols[count] + " ";
                 key[alphabet[i]].push_back(symbols[count]);
                 count++;
             }
+            std::cout << std::endl;
         }
 
         
@@ -181,9 +188,10 @@ int main(int argc, char* argv[]){
 
         while(getline(in_file, line)){
             for (unsigned int i = 0; i < line.size(); i++){
+                //if letter
                 if (std::count(alphabet.begin(), alphabet.end(), line[i]) > 0 ){
                     int random_index = random() % key[line[i]].size();
-                    outfile << key[line[i]][random_index];
+                    outfile << key[line[i]][random_index] << "|";
                 }
                 else{
                     outfile << line[i];
@@ -191,6 +199,9 @@ int main(int argc, char* argv[]){
                 
             }
         }
+
+        in_file.close();
+        outfile.close();
 
         homophonic_decrypt(key, argv[2]);
 
