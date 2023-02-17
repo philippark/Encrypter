@@ -24,6 +24,9 @@ std::map<char, char> Message::caesar_encrypt(int displacement, std::string input
     while(getline(in_file, line)){
         for (unsigned int i = 0; i < line.size(); i++){
             if (std::count(alphabet.begin(), alphabet.end(), line[i]) > 0 ){
+                if (isupper(line[i])){
+                    line[i] = tolower(line[i]);
+                }
                 outfile << caesar_key[line[i]];
             }
             else{
@@ -33,6 +36,8 @@ std::map<char, char> Message::caesar_encrypt(int displacement, std::string input
         }
     }
 
+    in_file.close();
+    outfile.close();
     return caesar_key;
 
 }
@@ -57,6 +62,9 @@ std::map<char, char> Message::monoalphabetic_encrypt(std::string in, std::string
     while(getline(in_file, line)){
         for (unsigned int i = 0; i < line.size(); i++){
             if (std::count(alphabet.begin(), alphabet.end(), line[i]) > 0 ){
+                if (isupper(line[i])){
+                    line[i] = tolower(line[i]);
+                }
                 outfile << key[line[i]];
             }
             else{
@@ -69,31 +77,40 @@ std::map<char, char> Message::monoalphabetic_encrypt(std::string in, std::string
     return key;
 }
 
-std::map<char, std::vector<std::string>> Message::homophonic_encrypt(std::string in, std::string out){
-        std::vector<std::string> symbols;
-        //create symbols
-        for (unsigned int i = 0; i < 105; i++){
-            if (i / 10 < 1){
-                std::string pad = "0" + std::to_string(i);
-                symbols.push_back(pad);
-                continue;
-            }
-            symbols.push_back(std::to_string(i));
-        } 
-        
-        std::random_shuffle(symbols.begin(), symbols.end());
+std::map<char, std::vector<std::string>> Message::create_homophonic_encryption(){
+    std::vector<std::string> symbols;
 
-        //assign symbols
-        std::map<char, std::vector<std::string>> key;
-        int count = 0;
-        for (unsigned int i = 0; i < alphabet.size(); i++){
-            std::vector<std::string> symbol_assignments;
-            key[alphabet[i]] = symbol_assignments;
-            for (int j = 0; j < letter_frq[i]; j++){
-                key[alphabet[i]].push_back(symbols[count]);
-                count++;
-            }
+    //create symbols
+    for (unsigned int i = 0; i < 105; i++){
+        if (i / 10 < 1){
+            std::string pad = "0" + std::to_string(i);
+            symbols.push_back(pad);
+            continue;
         }
+        symbols.push_back(std::to_string(i));
+    } 
+    
+    std::random_shuffle(symbols.begin(), symbols.end());
+
+    //assign symbols
+    std::map<char, std::vector<std::string>> key;
+    int count = 0;
+    for (unsigned int i = 0; i < alphabet.size(); i++){
+        std::vector<std::string> symbol_assignments;
+        key[alphabet[i]] = symbol_assignments;
+        for (int j = 0; j < letter_frq[i]; j++){
+            key[alphabet[i]].push_back(symbols[count]);
+            count++;
+        }
+    }
+
+    return key;
+}
+
+
+
+std::map<char, std::vector<std::string>> Message::homophonic_encrypt(std::string in, std::string out){
+        std::map<char, std::vector<std::string>> key = create_homophonic_encryption();
 
         
         std::ifstream in_file(in);
@@ -103,6 +120,9 @@ std::map<char, std::vector<std::string>> Message::homophonic_encrypt(std::string
         while(getline(in_file, line)){
             for (unsigned int i = 0; i < line.size(); i++){
                 if (std::count(alphabet.begin(), alphabet.end(), line[i]) > 0 ){
+                    if (isupper(line[i])){
+                        line[i] = tolower(line[i]);
+                    }
                     int random_index = random() % key[line[i]].size();
                     outfile << key[line[i]][random_index] << "|";
                 }
@@ -118,30 +138,56 @@ std::map<char, std::vector<std::string>> Message::homophonic_encrypt(std::string
 }
 
 void Message::create_vigenere_table(){
-    std::map<char, std::vector<char>> vigenere_table;
-
     for(unsigned int i = 0; i < alphabet.size(); i++){
-        std::cout << "a: ";
         std::vector<char> x;
         for (unsigned j = i; j < alphabet.size(); j++){
-            std::cout << alphabet[j] << " ";
             x.push_back(alphabet[j]);
         }
         for (unsigned int z = 0; z < i; z++){
-            std::cout << alphabet[z] << " ";
             x.push_back(alphabet[z]);
         }
-        std::cout << std::endl;
         vigenere_table[alphabet[i]] = x;
     }
 }
 
-void Message::vigenere_encrypt(std::string keyword, std::string in){
-    //let numbers represent alphabets. for ex: [2][2] is C C on table
+void Message::vigenere_encrypt(std::string keyword, std::string in, std::string out){
     create_vigenere_table();
 
-    
+    std::ifstream infile(in);
+    std::ofstream outfile(out);
+    std::string line;
 
+    int word_count = 0;
+    int key_count = 0;
+
+    
+    while(getline(infile, line)){
+        for (unsigned int i = 0; i < line.size(); i++){
+            if (isupper(line[i])){
+                line[i] = tolower(line[i]);
+            }
+
+            if (std::count(alphabet.begin(), alphabet.end(), line[i]) > 0){
+                if (key_count == keyword.size()){
+                    key_count = 0;
+                }
+
+                auto pos = std::find(alphabet.begin(), alphabet.end(), line[i]);
+                int word_index = pos - alphabet.begin();
+
+                outfile << vigenere_table[keyword[key_count]][word_index];
+
+                key_count++;
+            }
+            else{
+                outfile << line[i];
+            }
+        }
+    }
+
+    infile.close();
+    outfile.close();
+    
 }
 
 
@@ -166,6 +212,9 @@ void Message::decrypt(std::map<char, char>& key, std::string in){
             
         }
     }
+
+    infile.close();
+    outfile.close();
 }
 
 
@@ -201,4 +250,38 @@ void Message::homophonic_decrypt(std::map<char, std::vector<std::string>>& key, 
 
     }
 
+    infile.close();
+    outfile.close();
+
+}
+
+
+void Message::vigenere_decrypt(std::string keyword, std::string in){
+    std::ifstream infile(in);
+    std::ofstream outfile(in + "_decrypted.txt");
+
+    std::string line;
+    
+    int key_count = 0;
+
+    while(getline(infile, line)){
+        for (unsigned int i = 0; i < line.size(); i++){
+            if (std::count(alphabet.begin(), alphabet.end(), line[i]) > 0){
+                if(key_count == keyword.size()){
+                    key_count = 0;
+                }
+
+                auto pos = std::find(vigenere_table[keyword[key_count]].begin(), vigenere_table[keyword[key_count]].end(), line[i]);
+                int index = pos - vigenere_table[keyword[key_count]].begin();
+
+                outfile << alphabet[index];
+
+
+                key_count++;
+            }   
+            else{
+                outfile << line[i];
+            }
+        }
+    }
 }

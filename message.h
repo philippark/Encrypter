@@ -12,16 +12,18 @@
 class Message{
 public:
     void create_vigenere_table();
+    std::map<char, std::vector<std::string>> create_homophonic_encryption();
 
     //encrypt
     std::map<char, char> caesar_encrypt(int displacement, std::string input, std::string output);
     std::map<char, char> monoalphabetic_encrypt(std::string in, std::string out);
     std::map<char, std::vector<std::string>> homophonic_encrypt(std::string in, std::string out);
-    void vigenere_encrypt(std::string keyword, std::string in);
+    void vigenere_encrypt(std::string keyword, std::string in, std::string out);
     
     //decrypt
     void decrypt(std::map<char, char>& key, std::string in);
     void homophonic_decrypt(std::map<char, std::vector<std::string>>& key, std::string in);
+    void vigenere_decrypt(std::string keyword, std::string in);
 
 
 private:
