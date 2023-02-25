@@ -2,7 +2,8 @@
 
 
 
-std::map<char, char> Message::caesar_encrypt(int displacement, std::ifstream& in_file, std::ofstream& out_file){
+void Message::caesar_encrypt(int displacement, std::ifstream& in_file, std::string file_name){
+    std::ofstream out_file(file_name.substr(0, file_name.size()-4) + "_encrypted.txt");
     std::map<char, char> caesar_key;
 
     unsigned int i = 0;
@@ -39,17 +40,18 @@ std::map<char, char> Message::caesar_encrypt(int displacement, std::ifstream& in
     in_file.close();
     out_file.close();
 
-    std::ofstream key_file("key.txt");
+    std::ofstream key_file(file_name.substr(0, file_name.size()-4) + "_key.txt");
     key_file << "caesar" << std::endl;
     for (std::map<char,char>::iterator i = caesar_key.begin(); i != caesar_key.end(); i++){
         key_file << i->first << ": " << i -> second << std::endl;
     }
 
-    return caesar_key;
 
 }
 
-std::map<char, char> Message::monoalphabetic_encrypt(std::ifstream in_file, std::ofstream out_file){
+void Message::monoalphabetic_encrypt(std::ifstream &in_file, std::string file_name){
+    std::ofstream out_file(file_name.substr(0, file_name.size()-4) + "_encrypted.txt");
+
     std::vector<int> arrangement;
     for (unsigned int i = 0; i < 26; i++){
         arrangement.push_back(i);
@@ -79,7 +81,11 @@ std::map<char, char> Message::monoalphabetic_encrypt(std::ifstream in_file, std:
         }
     }
     
-    return key;
+    std::ofstream key_file(file_name.substr(0, file_name.size()-4) + "_key.txt");
+    key_file << "monoalphabetic" << std::endl;
+    for (std::map<char,char>::iterator i = key.begin(); i != key.end(); i++){
+        key_file << i->first << ": " << i -> second << std::endl;
+    }
 }
 
 std::map<char, std::vector<std::string>> Message::create_homophonic_encryption(){
@@ -114,7 +120,9 @@ std::map<char, std::vector<std::string>> Message::create_homophonic_encryption()
 
 
 
-std::map<char, std::vector<std::string>> Message::homophonic_encrypt(std::ifstream in_file, std::ofstream out_file){
+void Message::homophonic_encrypt(std::ifstream &in_file, std::string file_name){
+        std::ofstream out_file(file_name.substr(0, file_name.size()-4) + "_encrypted.txt");
+
         std::map<char, std::vector<std::string>> key = create_homophonic_encryption();
 
         std::string line;
@@ -135,7 +143,16 @@ std::map<char, std::vector<std::string>> Message::homophonic_encrypt(std::ifstre
             }
         }
     
-        return key;
+        std::ofstream key_file(file_name.substr(0, file_name.size()-4) + "_key.txt");
+        key_file << "homophonic" << std::endl;
+        for (std::map<char,std::vector<std::string>>::iterator i = key.begin(); i != key.end(); i++){
+            key_file << i->first << ": ";
+            std::vector<std::string> v = i->second;
+            for (unsigned int j = 0; j < v.size(); j++){
+                key_file << v[j] << " ";
+            }
+            key_file << std::endl;
+        }
 
 }
 
@@ -152,7 +169,9 @@ void Message::create_vigenere_table(){
     }
 }
 
-void Message::vigenere_encrypt(std::string keyword, std::ifstream in_file, std::ofstream out_file){
+void Message::vigenere_encrypt(std::string keyword, std::ifstream &in_file, std::string file_name){
+    std::ofstream out_file(file_name.substr(0, file_name.size()-4) + "_encrypted.txt");
+
     create_vigenere_table();
 
     std::string line;
@@ -187,6 +206,21 @@ void Message::vigenere_encrypt(std::string keyword, std::ifstream in_file, std::
 
     in_file.close();
     out_file.close();
+
+    std::ofstream key_file(file_name.substr(0, file_name.size()-4) + "_key.txt");
+
+    key_file << "vigenere" << std::endl;
+    key_file << keyword << std::endl;
+    for (std::map<char,std::vector<char>>::iterator i = vigenere_table.begin(); i != vigenere_table.end(); i++){
+        key_file << i->first << ": ";
+        std::vector<char> v = i->second;
+        for (unsigned int j = 0; j < v.size(); j++){
+            key_file << v[j] << " ";
+        }
+        key_file << std::endl;
+    }
+
+    
     
 }
 
@@ -217,7 +251,7 @@ void Message::decrypt(std::map<char, char>& key, std::ifstream& in_file){
 }
 
 
-void Message::homophonic_decrypt(std::map<char, std::vector<std::string>>& key, std::ifstream in_file){
+void Message::homophonic_decrypt(std::map<char, std::vector<std::string>>& key, std::ifstream &in_file){
     std::ofstream out_file("decrypted.txt");
     std::string line;
 
@@ -254,8 +288,10 @@ void Message::homophonic_decrypt(std::map<char, std::vector<std::string>>& key, 
 }
 
 
-void Message::vigenere_decrypt(std::string keyword, std::ifstream in_file){
+void Message::vigenere_decrypt(std::string keyword, std::ifstream &in_file){
     std::ofstream out_file("decrypted.txt");
+
+    create_vigenere_table();
 
     std::string line;
     

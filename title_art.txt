@@ -10,7 +10,12 @@
 -[ 4 ciphers ] ______________________________________________
 _____________________________________________________________
 
-Usage: ./cyphen.exe [input file] [output file] {--cipher specifications}
+Terminal Usage:
+Encrypt: normal.txt {optional out.txt} -caesar -e
+Decrypt: key.txt encrypted.txt {optional out.txt} -d
 
 1) ciphers catalog
+2) encrypt
+3) decrypt
+q) exit
 

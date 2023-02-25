@@ -15,15 +15,15 @@ public:
     std::map<char, std::vector<std::string>> create_homophonic_encryption();
 
     //encrypt
-    std::map<char, char> caesar_encrypt(int displacement, std::ifstream& in_file, std::ofstream& out_file);
-    std::map<char, char> monoalphabetic_encrypt(std::ifstream in_file, std::ofstream out_file);
-    std::map<char, std::vector<std::string>> homophonic_encrypt(std::ifstream in_file, std::ofstream out_file);
-    void vigenere_encrypt(std::string keyword, std::ifstream in_file, std::ofstream out_file);
+    void caesar_encrypt(int displacement, std::ifstream& in_file, std::string file_name);
+    void monoalphabetic_encrypt(std::ifstream &in_file, std::string file_name);
+    void homophonic_encrypt(std::ifstream &in_file, std::string file_name);
+    void vigenere_encrypt(std::string keyword, std::ifstream &in_file, std::string filename);
     
     //decrypt
     void decrypt(std::map<char, char>& key, std::ifstream& in_file);
-    void homophonic_decrypt(std::map<char, std::vector<std::string>>& key, std::ifstream in_file);
-    void vigenere_decrypt(std::string keyword, std::ifstream in_file);
+    void homophonic_decrypt(std::map<char, std::vector<std::string>>& key, std::ifstream &in_file);
+    void vigenere_decrypt(std::string keyword, std::ifstream &in_file);
 
 
 private:
