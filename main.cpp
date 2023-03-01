@@ -49,7 +49,10 @@ void encrypt(){
 
 
 void catalog(){
-    std::cout << "x" << std::endl;
+    std::cout << "- caesar" << std::endl;
+    std::cout << "- monoalphabetic" << std::endl;
+    std::cout << "- homophonic" << std::endl;
+    std::cout << "- vigenere" << std::endl;
     return;
 }
 
@@ -97,16 +100,16 @@ void user_input(){
 
         getline(std::cin, line);
 
-        if (line == "q"){
+        if (line == "q" || line == "exit"){
             return;
         }
 
-        if (line == "1"){
+        if (line == "1" || line == "cipher catalog"){
             catalog();
             continue;
         }
 
-        if (line == "encrypt"){
+        if (line == "2" || line == "encrypt"){
             std::string file_name;
 
             std::cout << "in: ";
@@ -154,7 +157,7 @@ void user_input(){
 
             if (encrypted){
                 std::cout << std::endl;
-                std::cout << "  Encrypted -> " << file_name.substr(0, file_name.size()-4) << "_encrypted.txt" << std::endl;
+                std::cout << "  Encrypted " << file_name << " -> " << file_name.substr(0, file_name.size()-4) << "_encrypted.txt" << std::endl;
                 std::cout << std::endl;
 
                 encrypted = false;
@@ -163,19 +166,22 @@ void user_input(){
             
         }
 
-        if (line == "decrypt"){
+        if (line == "3" || line == "decrypt"){
             std::string line;
-
-            std::cout << "key file: ";
-            getline(std::cin, line);
-            std::ifstream key_file(line);
-
-            std::string cipher;
-            getline(key_file, cipher);
+            std::string file_name;
 
             std::cout << "encrypted file: ";
             getline(std::cin, line);
             std::ifstream encrypted(line);
+
+            std::cout << "key: ";
+            getline(std::cin, line);
+            std::ifstream key_file(line);
+            file_name = line;
+
+            std::string cipher;
+            getline(key_file, cipher);
+
 
             bool decrypted = false;
 
@@ -216,7 +222,7 @@ void user_input(){
 
             if(decrypted){
                 std::cout << std::endl;
-                std::cout << "  Decrypted -> decrypted.txt" << std::endl;
+                std::cout << "  Decrypted " << file_name << " -> decrypted.txt" << std::endl;
                 std::cout << std::endl;
             }
 
