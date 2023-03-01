@@ -10,10 +10,6 @@
 -[ 4 ciphers ] ______________________________________________
 _____________________________________________________________
 
-Terminal Usage:
-Encrypt: normal.txt {optional out.txt} -caesar -e
-Decrypt: key.txt encrypted.txt {optional out.txt} -d
-
 1) ciphers catalog
 2) encrypt
 3) decrypt
